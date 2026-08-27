@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LUXPRO — Iluminação Corporativa</title>
+<style>
+:root{--bg:#f4f5f7;--card:#fff;--text:#111827;--muted:#6b7280;--line:#d9dde3;--accent:#111827;--ok:#15803d;--bad:#b91c1c}
+*{box-sizing:border-box}
+body{margin:0;font-family:Inter,Arial,sans-serif;background:var(--bg);color:var(--text)}
+.app{max-width:1120px;margin:auto;padding:24px}
+header{padding:0 0 18px}
+header h1{margin:0;font-size:28px;letter-spacing:-.5px}
+header p{margin:6px 0 0;color:#6b7280;font-size:15px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:16px}
+.full{grid-column:1/-1}
+.card h2{font-size:18px;margin:0 0 14px}
+label{display:block;font-size:13px;font-weight:700;margin:11px 0 6px}
+input,select{width:100%;height:44px;padding:10px 12px;border:1px solid #cfd5dc;border-radius:10px;font-size:15px;background:#fff;color:#111827}
+input:focus,select:focus{outline:2px solid #dbe4f0;border-color:#94a3b8}
+.row{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.metrics{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:13px}
+.metric{background:#f7f8fa;border:1px solid #e3e6ea;border-radius:12px;padding:12px}
+.metric small{display:block;color:var(--muted);font-size:11px;margin-bottom:4px}
+.metric strong{font-size:20px}
+.note{font-size:12px;line-height:1.45;color:var(--muted);margin-top:11px}
+.actions{display:flex;gap:10px;flex-wrap:wrap}
+button{height:44px;border:0;border-radius:10px;padding:0 16px;font-weight:800;cursor:pointer;background:#111827;color:#fff}
+button.secondary{background:#e6e9ee;color:#111827}
+button.danger{background:#111827;color:#fff;height:38px;padding:0 13px}
+.lum-card{border:1px solid #e1e4e8;border-radius:14px;padding:14px;margin-bottom:10px;background:#fafafa}
+.lum-head{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.lum-head strong{font-size:17px}
+.result-grid{display:grid;grid-template-columns:1.15fr 1fr;gap:14px}
+.hero{border:1px solid #e0e4e9;border-radius:14px;background:#f8fafc;padding:18px}
+.big{font-size:42px;font-weight:850;letter-spacing:-1px}
+.status{font-size:22px;font-weight:850;margin-top:7px}
+.ok{color:var(--ok)}.bad{color:var(--bad)}
+.bar{height:10px;background:#e5e7eb;border-radius:99px;overflow:hidden;margin:13px 0}
+.bar span{display:block;height:100%;width:0;background:#374151}
+.result-list{display:grid;gap:8px}
+.empty{border:1px dashed #cbd2da;border-radius:12px;padding:17px;text-align:center;color:#6b7280;background:#fff}
+footer{font-size:11px;color:#6b7280;line-height:1.5;margin:16px 2px}
+@media(max-width:760px){
+ .app{padding:14px}.grid,.result-grid{grid-template-columns:1fr}.full{grid-column:auto}
+ .row{grid-template-columns:1fr 1fr}.metrics{grid-template-columns:1fr 1fr}
+ header h1{font-size:24px}.big{font-size:36px}
+}
+@media(max-width:480px){
+ .row,.metrics{grid-template-columns:1fr}
+}
+
+/* ===== Alinhamento perfeito dos parâmetros ===== */
+.params-grid{
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  column-gap:12px;
+  row-gap:0;
+  align-items:start;
+}
+.params-grid > div{min-width:0}
+.params-grid label{
+  height:42px;
+  min-height:42px;
+  margin:0 0 6px 0;
+  line-height:1.35;
+  display:flex;
+  align-items:flex-start;
+}
+.params-grid input,
+.params-grid select{
+  height:44px;
+  width:100%;
+  margin:0;
+}
+.params-note{
+  grid-column:1/-1;
+}
+@media(max-width:760px){
+  .params-grid{grid-template-columns:1fr 1fr}
+  .params-note{grid-column:1/-1}
+  .params-grid label{height:auto;min-height:0;margin-top:11px}
+}
+@media(max-width:480px){
+  .params-grid{grid-template-columns:1fr}
+  .params-note{grid-column:auto}
+}
+</style>
+</head>
+<body>
+<div class="app">
+<header>
+  <h1>LUXPRO</h1>
+  <p>Iluminação para projetos corporativos</p>
+</header>
+
+<div class="grid">
+<section class="card full">
+  <h2>Projeto</h2>
+  <div class="row" style="grid-template-columns:1fr 1fr">
+    <div>
+      <label>Nome do projeto</label>
+      <input id="project" placeholder="Ex.: Escritório — Sala de reunião">
+    </div>
+    <div>
+      <label>Ambiente / atividade</label>
+      <select id="activity">
+        <option value="500|19|80|Escrever, teclar, ler e processar dados">Escrever, teclar, ler e processar dados — referência 500 lx</option>
+        <option value="500|19|80|Sala de reunião / conferência">Sala de reunião / conferência — referência 500 lx</option>
+        <option value="300|22|80|Recepção">Recepção — referência 300 lx</option>
+        <option value="200|25|80|Arquivo">Arquivo — referência 200 lx</option>
+        <option value="750|16|80|Desenho técnico">Desenho técnico — referência 750 lx</option>
+        <option value="300|25|80|Circulação / corredor">Circulação / corredor — referência 300 lx</option>
+        <option value="200|22|80|Refeitório / sala de jantar">Refeitório / sala de jantar — referência 200 lx</option>
+      </select>
+    </div>
+  </div>
+  <div class="note" id="activityNote">O plano de trabalho e a atividade visual devem ser considerados na definição do nível de iluminância.</div>
+</section>
+
+<section class="card">
+  <h2>1. Dimensões</h2>
+  <div class="row">
+    <div><label>Comprimento (m)</label><input id="length" type="number" min="0" step="0.01" placeholder="Ex.: 10"></div>
+    <div><label>Largura (m)</label><input id="width" type="number" min="0" step="0.01" placeholder="Ex.: 6"></div>
+    <div><label>Altura do teto (m)</label><input id="height" type="number" min="0" step="0.01" placeholder="Ex.: 2,80"></div>
+  </div>
+  <div class="metric" style="margin-top:12px"><small>Área do ambiente</small><strong id="area">0,00 m²</strong></div>
+</section>
+
+<section class="card">
+  <h2>2. Parâmetros</h2>
+  <div class="params-grid">
+    <div>
+      <label>Fator de utilização (%)</label>
+      <input id="uf" type="number" min="0" max="100" step="1" placeholder="Ex.: 70">
+    </div>
+    <div>
+      <label>Fator de manutenção (%)</label>
+      <input id="mf" type="number" min="0" max="100" step="1" placeholder="Ex.: 80">
+    </div>
+    <div>
+      <label>Temperatura de cor (K)</label>
+      <select id="cct">
+        <option>3000</option><option selected>4000</option><option>5000</option><option>6500</option>
+      </select>
+    </div>
+    <div>
+      <label>Lux desejados</label>
+      <input id="target" type="number" min="0" step="1" value="500">
+    </div>
+    <div>
+      <label>Meta de potência (W/m²)</label>
+      <input id="powerTarget" type="number" min="0" step="0.1" placeholder="Opcional">
+    </div>
+    <div></div>
+    <div class="note params-note">
+      Os fatores devem ser informados em porcentagem. Para projeto executivo, o fator de utilização deve ser obtido a partir dos dados fotométricos e das características do ambiente.
+    </div>
+  </div>
+</section>
+
+<section class="card full">
+  <h2>3. Luminárias</h2>
+  <div id="luminarias"></div>
+  <div class="actions">
+    <button type="button" id="addLumBtn">＋ Adicionar luminária</button>
+    <button type="button" class="secondary" id="clearLumsBtn">Limpar modelos</button>
+  </div>
+  <div class="note">Cadastre quantos modelos forem necessários. Todos os campos começam vazios para você inserir os dados da ficha técnica.</div>
+</section>
+
+<section class="card full">
+  <h2>4. Resultado</h2>
+  <div class="result-grid">
+    <div class="hero">
+      <div style="color:#6b7280;font-size:13px">Iluminância mantida estimada</div>
+      <div class="big" id="luxCalc">0 lux</div>
+      <div class="bar"><span id="bar"></span></div>
+      <div class="status" id="status">AGUARDANDO DADOS</div>
+      <div class="note" id="resultNote">Preencha área, fatores e pelo menos uma luminária para calcular.</div>
+    </div>
+    <div class="result-list">
+      <div class="metric"><small>Área</small><strong id="areaR">0,00 m²</strong></div>
+      <div class="metric"><small>Fluxo total instalado</small><strong id="fluxTotal">0 lm</strong></div>
+      <div class="metric"><small>Potência instalada</small><strong id="powerTotal">0 W</strong></div>
+      <div class="metric"><small>Densidade de potência</small><strong id="density">0 W/m²</strong></div>
+      <div class="metric"><small>Ra mínimo informado</small><strong id="raResult">—</strong></div>
+    </div>
+  </div>
+  <div class="metrics">
+    <div class="metric"><small>Iluminância requerida</small><strong id="luxN">500 lux</strong></div>
+    <div class="metric"><small>UGRₗ de referência</small><strong id="ugrN">19</strong></div>
+    <div class="metric"><small>Ra mínimo de referência</small><strong id="raN">80</strong></div>
+  </div>
+</section>
+</div>
+
+<footer>
+Base de referência: ABNT NBR ISO/CIE 8995-1:2013 — Iluminação de ambientes de trabalho — Parte 1: Interior.
+Os valores de atividade exibidos são referências de pré-dimensionamento. A verificação executiva deve considerar os dados fotométricos da luminária, uniformidade, UGR, manutenção, geometria e demais requisitos aplicáveis.
+</footer>
+</div>
+
+<script>
+(() => {
+  let lums = [];
+
+  const $ = id => document.getElementById(id);
+  const num = v => {
+    if(v === null || v === undefined || v === "") return 0;
+    return Number(String(v).replace(",", ".")) || 0;
+  };
+  const fmt = (n,d=2) => Number(n).toLocaleString("pt-BR",{minimumFractionDigits:d,maximumFractionDigits:d});
+
+  function escapeHtml(v){
+    return String(v ?? "").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+  }
+
+  function updateActivity(){
+    const [lux,ugr,ra,desc] = $("activity").value.split("|");
+    $("target").value = lux;
+    $("luxN").textContent = lux + " lux";
+    $("ugrN").textContent = ugr;
+    $("raN").textContent = ra;
+    $("activityNote").textContent = desc + ". O plano de trabalho e a atividade visual devem ser considerados na definição do nível de iluminância.";
+    calc();
+  }
+
+  function renderLums(){
+    const box = $("luminarias");
+    box.innerHTML = "";
+    if(!lums.length){
+      box.innerHTML = '<div class="empty">Nenhuma luminária adicionada.<br><strong>Clique em “Adicionar luminária” para cadastrar um modelo.</strong></div>';
+      return;
+    }
+    lums.forEach((x,i)=>{
+      const card = document.createElement("div");
+      card.className = "lum-card";
+      card.innerHTML = `
+        <div class="lum-head">
+          <strong>Luminária ${i+1}</strong>
+          <button type="button" class="danger deleteLum" data-index="${i}">Excluir</button>
+        </div>
+        <label>Nome / modelo</label>
+        <input class="lumInput" data-index="${i}" data-key="name" value="${escapeHtml(x.name)}" placeholder="Ex.: Painel LED 36 W">
+
+        <div class="row">
+          <div><label>Fluxo (lm)</label><input class="lumInput" type="number" data-index="${i}" data-key="lm" value="${x.lm}" min="0" step="1" placeholder="Ex.: 3600"></div>
+          <div><label>Potência (W)</label><input class="lumInput" type="number" data-index="${i}" data-key="w" value="${x.w}" min="0" step="0.1" placeholder="Ex.: 36"></div>
+          <div><label>Quantidade</label><input class="lumInput" type="number" data-index="${i}" data-key="q" value="${x.q}" min="0" step="1" placeholder="Ex.: 10"></div>
+        </div>
+
+        <div class="row">
+          <div><label>Ra</label><input class="lumInput" type="number" data-index="${i}" data-key="ra" value="${x.ra}" min="0" max="100" step="1" placeholder="Ex.: 80"></div>
+          <div><label>Fator de utilização (%)</label><input class="lumInput" type="number" data-index="${i}" data-key="uf" value="${x.uf}" min="0" max="100" step="1" placeholder="Ex.: 70"></div>
+          <div><label>Fator de manutenção (%)</label><input class="lumInput" type="number" data-index="${i}" data-key="mf" value="${x.mf}" min="0" max="100" step="1" placeholder="Ex.: 80"></div>
+        </div>`;
+      box.appendChild(card);
+    });
+  }
+
+  function addLum(){
+    lums.push({name:"",lm:"",w:"",q:"",ra:"",uf:"",mf:""});
+    renderLums();
+    calc();
+  }
+
+  function deleteLum(i){
+    lums.splice(i,1);
+    renderLums();
+    calc();
+  }
+
+  function clearLums(){
+    if(!confirm("Deseja limpar todas as luminárias cadastradas?")) return;
+    lums = [];
+    renderLums();
+    calc();
+  }
+
+  function calc(){
+    const area = num($("length").value) * num($("width").value);
+    $("area").textContent = fmt(area) + " m²";
+    $("areaR").textContent = fmt(area) + " m²";
+
+    let totalFlux=0,totalPower=0,effectiveFlux=0;
+    const active=[];
+
+    lums.forEach(x=>{
+      const lm=num(x.lm), w=num(x.w), q=num(x.q);
+      const uf=num(x.uf)/100, mf=num(x.mf)/100;
+      totalFlux += lm*q;
+      totalPower += w*q;
+      if(q>0) effectiveFlux += lm*q*uf*mf;
+      if(q>0 && num(x.ra)>0) active.push(num(x.ra));
+    });
+
+    const maintained = area>0 ? effectiveFlux/area : 0;
+    const density = area>0 ? totalPower/area : 0;
+    const target = num($("target").value);
+    const ra = active.length ? Math.min(...active) : null;
+
+    $("luxCalc").textContent = fmt(maintained,0) + " lux";
+    $("fluxTotal").textContent = fmt(totalFlux,0) + " lm";
+    $("powerTotal").textContent = fmt(totalPower,1) + " W";
+    $("density").textContent = fmt(density,2) + " W/m²";
+    $("raResult").textContent = ra === null ? "—" : fmt(ra,0);
+
+    const hasArea = area>0;
+    const hasLum = lums.some(x=>num(x.q)>0 && num(x.lm)>0);
+    const hasFactors = num($("uf").value)>0 && num($("mf").value)>0;
+    const ready = hasArea && hasLum && hasFactors;
+
+    if(!ready){
+      $("status").textContent = "AGUARDANDO DADOS";
+      $("status").className = "status";
+      $("resultNote").textContent = "Preencha área, fatores e pelo menos uma luminária para calcular.";
+      $("bar").style.width = "0%";
+      return;
+    }
+
+    // If global factors are filled, they act as project factors.
+    // Per-luminaire factors remain available for mixed luminaires.
+    // For consistency, use per-luminaire values when supplied; otherwise use project values.
+    const projectUF = num($("uf").value)/100;
+    const projectMF = num($("mf").value)/100;
+    let effectiveProject=0;
+
+    lums.forEach(x=>{
+      const lm=num(x.lm), q=num(x.q);
+      const uf = num(x.uf)>0 ? num(x.uf)/100 : projectUF;
+      const mf = num(x.mf)>0 ? num(x.mf)/100 : projectMF;
+      effectiveProject += lm*q*uf*mf;
+    });
+
+    const lux = area>0 ? effectiveProject/area : 0;
+    $("luxCalc").textContent = fmt(lux,0) + " lux";
+
+    const pct = target>0 ? (lux/target)*100 : 0;
+    $("bar").style.width = Math.min(100,pct) + "%";
+
+    const luxOK = lux >= target;
+    const raOK = ra === null || ra >= num($("raN").textContent);
+    const powerTarget = num($("powerTarget").value);
+    const powerOK = !powerTarget || density <= powerTarget;
+
+    $("status").textContent = luxOK ? "✓ ATENDE ILUMINÂNCIA" : "✕ NÃO ATENDE ILUMINÂNCIA";
+    $("status").className = "status " + (luxOK ? "ok" : "bad");
+
+    let note = `Resultado por método dos lúmens: Σ(fluxo × quantidade × FU × FM) ÷ área. `;
+    note += luxOK ? "A iluminância estimada atingiu a meta selecionada. " : "Aumente o fluxo/quantidade ou revise os parâmetros. ";
+    if(!raOK) note += "O Ra informado abaixo da referência selecionada deve ser revisado. ";
+    if(powerTarget) note += powerOK ? "A meta de potência foi atingida." : "A meta de potência foi ultrapassada.";
+    $("resultNote").textContent = note;
+  }
+
+  function init(){
+    $("addLumBtn").addEventListener("click",addLum);
+    $("clearLumsBtn").addEventListener("click",clearLums);
+    $("luminarias").addEventListener("click",e=>{
+      const b=e.target.closest(".deleteLum");
+      if(b) deleteLum(Number(b.dataset.index));
+    });
+    $("luminarias").addEventListener("input",e=>{
+      const input=e.target.closest(".lumInput");
+      if(!input) return;
+      const i=Number(input.dataset.index), key=input.dataset.key;
+      lums[i][key] = key==="name" ? input.value : input.value;
+      calc();
+    });
+    $("activity").addEventListener("change",updateActivity);
+    ["length","width","height","uf","mf","target","powerTarget","cct"].forEach(id=>$(id).addEventListener("input",calc));
+    renderLums();
+    updateActivity();
+  }
+
+  if(document.readyState==="loading") document.addEventListener("DOMContentLoaded",init);
+  else init();
+})();
+</script>
+</body>
+</html>
