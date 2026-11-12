@@ -94,7 +94,27 @@ footer{font-size:11px;color:var(--muted);margin:18px 2px}
 </section>
 
 <section class="card">
-<h2>3. Luminárias</h2>
+<h2>3. Geometria e refletâncias</h2>
+<div class="dimension-fields">
+  <div class="field"><label>Plano de trabalho (m)</label><input id="workplane" type="number" min="0" step="0.01" placeholder="Informar altura"></div>
+  <div class="field"><label>Rebaixo / suspensão (m)</label><input id="suspension" type="number" min="0" step="0.01" value="0"></div>
+  <div class="field"><label>Altura útil (m)</label><input id="mountingHeight" type="text" value="—" readonly></div>
+</div>
+<div class="row" style="margin-top:10px">
+  <div><label>Refletância do teto</label><select id="ceilingReflectance"><option value="0.7">Clara — 70%</option><option value="0.5">Média — 50%</option><option value="0.3">Escura — 30%</option></select></div>
+  <div><label>Refletância das paredes</label><select id="wallReflectance"><option value="0.5">Clara — 50%</option><option value="0.3">Média — 30%</option><option value="0.1">Escura — 10%</option></select></div>
+  <div><label>Refletância do piso</label><select id="floorReflectance"><option value="0.2">Média — 20%</option><option value="0.1">Escura — 10%</option><option value="0.3">Clara — 30%</option></select></div>
+</div>
+<div class="nbr" style="margin-top:12px">
+  <div class="metric"><small>Índice do recinto (K)</small><strong id="roomIndex">—</strong></div>
+  <div class="metric"><small>Altura útil de montagem</small><strong id="usefulHeight">—</strong> m</div>
+  <div class="metric"><small>Refletâncias cadastradas</small><strong id="reflectanceSummary">70/50/20%</strong></div>
+</div>
+<div class="note">As refletâncias são dados de entrada estimados e devem ser ajustadas ao acabamento real. O índice K descreve a geometria do recinto; não calcula o fator de utilização. Para obter UF com rigor, é necessário consultar a tabela fotométrica do fabricante (IES/LDT ou tabela de utilização) para a luminária, distribuição e refletâncias correspondentes.</div>
+</section>
+
+<section class="card">
+<h2>4. Luminárias</h2>
 <div id="luminarias"></div>
 <button type="button" id="addLumBtn">＋ Adicionar luminária</button>
 <button type="button" class="secondary" id="clearLumsBtn">Limpar modelos</button>
@@ -102,14 +122,14 @@ footer{font-size:11px;color:var(--muted);margin:18px 2px}
 </section>
 
 <section class="card">
-<h2>4. Resultado</h2>
+<h2>5. Resultado</h2>
 <div class="result">
 <div class="hero">
 <div style="color:#6b7280;font-size:13px">Iluminância mantida estimada</div>
 <div class="big" id="luxCalc">384 lux</div>
 <div class="bar"><span id="bar"></span></div>
 <div class="status" id="status">NÃO ATENDE</div>
-<div class="note">Pré-dimensionamento simplificado por fluxo luminoso e área. Este cálculo não comprova conformidade com ABNT: é necessário verificar distribuição, iluminância ponto a ponto, uniformidade, ofuscamento (UGR), plano de trabalho, refletâncias e fator de manutenção. O pé-direito informado ainda não entra nesta fórmula.</div>
+<div class="note">Pré-dimensionamento simplificado por fluxo luminoso e área. Este cálculo não comprova conformidade com ABNT: é necessário verificar distribuição, iluminância ponto a ponto, uniformidade, ofuscamento (UGR), plano de trabalho, refletâncias e fator de manutenção. A geometria do recinto agora é caracterizada por K e altura útil; esses dados ainda não substituem o cálculo fotométrico nem alteram automaticamente o UF.</div>
 </div>
 <div>
 <div class="metric"><small>Fluxo total</small><strong id="fluxTotal">36.000 lm</strong></div>
@@ -283,6 +303,23 @@ footer{font-size:11px;color:var(--muted);margin:18px 2px}
     const area = (Number($("length").value)||0) * (Number($("width").value)||0);
     $("area").textContent = fmt(area) + " m²";
 
+    const ceiling = Number($("height").value) || 0;
+    const workplane = $("workplane").value === "" ? NaN : Number($("workplane").value);
+    const suspension = Number($("suspension").value) || 0;
+    const usefulHeight = ceiling - workplane - suspension;
+    const validGeometry = area > 0 && Number.isFinite(workplane) && workplane >= 0 &&
+      suspension >= 0 && usefulHeight > 0;
+    const roomIndex = validGeometry && (Number($("length").value) + Number($("width").value)) > 0
+      ? (Number($("length").value) * Number($("width").value)) /
+        (usefulHeight * (Number($("length").value) + Number($("width").value)))
+      : NaN;
+    $("mountingHeight").value = validGeometry ? fmt(usefulHeight) : "—";
+    $("usefulHeight").textContent = validGeometry ? fmt(usefulHeight) : "—";
+    $("roomIndex").textContent = Number.isFinite(roomIndex) ? fmt(roomIndex) : "—";
+    $("reflectanceSummary").textContent =
+      [ $("ceilingReflectance").value, $("wallReflectance").value, $("floorReflectance").value ]
+        .map(v => Math.round(Number(v)*100)).join("/") + "%";
+
     let totalFlux=0, totalPower=0, effectiveFlux=0;
     lums.forEach(x=>{
       totalFlux += x.lm*x.q;
@@ -353,7 +390,8 @@ footer{font-size:11px;color:var(--muted);margin:18px 2px}
     });
 
     $("activity").addEventListener("change", updateNBR);
-    ["length","width","height"].forEach(id => $(id).addEventListener("input",calc));
+    ["length","width","height","workplane","suspension"].forEach(id => $(id).addEventListener("input",calc));
+    ["ceilingReflectance","wallReflectance","floorReflectance"].forEach(id => $(id).addEventListener("change",calc));
 
     renderLums();
     updateNBR();
