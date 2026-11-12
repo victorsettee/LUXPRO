@@ -339,14 +339,14 @@ footer{font-size:11px;color:var(--muted);margin:18px 2px}
     $("density").textContent = fmt(density) + " W/m²";
     $("raResult").textContent = ra;
 
-    const complete = area > 0 && active.length > 0 && active.every(x =>
+    const complete = validGeometry && area > 0 && active.length > 0 && active.every(x =>
       Number(x.lm) > 0 && Number(x.w) > 0 && Number(x.q) > 0 &&
       Number(x.uf) > 0 && Number(x.uf) <= 1 &&
       Number(x.mf) > 0 && Number(x.mf) <= 1
     );
     const ok = complete && maintained >= target;
-    $("status").textContent = !complete ? "PREENCHA OS DADOS" :
-      (ok ? "ATINGE A REFERÊNCIA DE LUX" : "ABAIXO DA REFERÊNCIA DE LUX");
+    $("status").textContent = !validGeometry ? "INFORME A GEOMETRIA" : (!complete ? "PREENCHA OS DADOS" :
+      (ok ? "ATINGE A REFERÊNCIA DE LUX" : "ABAIXO DA REFERÊNCIA DE LUX"));
     $("status").className = "status " + (ok ? "ok" : "bad");
     $("bar").style.width = Math.min(100, complete && target ? maintained/target*100 : 0) + "%";
 
