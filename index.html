@@ -271,7 +271,8 @@ footer{font-size:11px;color:var(--muted);margin:18px 2px}
     const maintained = area>0 ? effectiveFlux/area : 0;
     const density = area>0 ? totalPower/area : 0;
     const active = lums.filter(x=>x.q>0);
-    const ra = active.length ? Math.min(...active.map(x=>x.ra)) : 0;
+    const raValues = active.map(x=>Number(x.ra)).filter(v=>v>0);
+    const ra = raValues.length ? Math.min(...raValues) : "—";
 
     $("luxCalc").textContent = fmt(maintained,0) + " lux";
     $("fluxTotal").textContent = fmt(totalFlux,0) + " lm";
