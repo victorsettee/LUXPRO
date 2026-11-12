@@ -3,11 +3,11 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Lumina Corporativo</title>
+<title>LUXPRO | Cálculo Luminotécnico</title>
 <style>
 :root{--bg:#f5f6f8;--card:#fff;--text:#18202a;--muted:#6b7280;--line:#e5e7eb;--accent:#1f2937;--ok:#15803d;--bad:#b91c1c}
 *{box-sizing:border-box} body{margin:0;font-family:Inter,Arial,sans-serif;background:var(--bg);color:var(--text)}
-.app{max-width:1100px;margin:auto;padding:24px}
+.app{max-width:1100px;margin:auto;padding:24px}.hidden{display:none!important}.start-screen{min-height:65vh;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;text-align:center}.start-screen h2{font-size:18px;margin:12px 0}.mode-buttons{display:grid;grid-template-columns:1fr 1fr;gap:14px;width:min(100%,620px)}.mode-btn{min-height:100px;margin:0;border:1px solid #d1d5db;background:#fff;color:#18202a;font-size:20px;letter-spacing:1px;border-radius:14px}.mode-btn:hover{background:#f3f4f6;border-color:#6b7280}.back-btn{margin:0 0 12px;background:#e5e7eb;color:#111827}
 header{background:var(--accent);color:#fff;border-radius:18px;padding:24px;margin-bottom:18px}
 header h1{margin:0 0 6px;font-size:28px} header p{margin:0;color:#d1d5db}
 .grid{display:grid;grid-template-columns:1fr 1fr;gap:18px}.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:20px}
@@ -20,7 +20,7 @@ label{display:block;font-size:13px;font-weight:600;margin:12px 0 6px} input,sele
 button{border:0;border-radius:10px;padding:12px 16px;font-weight:700;cursor:pointer;background:#111827;color:#fff;margin-top:15px}.secondary{background:#e5e7eb;color:#111827;margin-left:8px}
 .note{font-size:12px;color:var(--muted);line-height:1.5;margin-top:12px}
 footer{font-size:11px;color:var(--muted);margin:18px 2px}
-@media(max-width:760px){.app{padding:12px}.grid,.result{grid-template-columns:1fr}.full{grid-column:auto}.row,.nbr{grid-template-columns:1fr 1fr}header h1{font-size:23px}.big{font-size:34px}}
+@media(max-width:760px){.app{padding:12px}.grid,.result{grid-template-columns:1fr}.full{grid-column:auto}.row,.nbr{grid-template-columns:1fr 1fr}.mode-buttons{grid-template-columns:1fr;width:100%}header h1{font-size:23px}.big{font-size:34px}}
 </style>
 
 <style>
@@ -57,28 +57,29 @@ footer{font-size:11px;color:var(--muted);margin:18px 2px}
 <body>
 <div class="app">
 <header>
-  <h1>💡 LUXPRO</h1>
-  <p>Pré-dimensionamento luminotécnico para ambientes corporativos</p>
+  <h1>LUXPRO</h1>
+  <p id="headerSubtitle">Cálculo luminotécnico residencial e comercial</p>
 </header>
 
-<div class="grid">
+<section id="startScreen" class="start-screen">
+  <h2>Selecione o tipo de projeto</h2>
+  <div class="mode-buttons">
+    <button type="button" class="mode-btn" id="residentialBtn">RESIDENCIAL</button>
+    <button type="button" class="mode-btn" id="commercialBtn">COMERCIAL</button>
+  </div>
+</section>
+
+<div class="grid hidden" id="calculator">
 <section class="card">
 <h2>1. Ambiente e atividade</h2>
-<label>Nome do projeto</label><input id="project" placeholder="Ex.: Escritório Sette">
-<label>Atividade</label>
-<select id="activity">
-<option value="500|19|80|Escrever, teclar, ler e processar dados">Escrever, teclar, ler e processar dados — 500 lux</option>
-<option value="500|19|80|Sala de reunião / conferência">Sala de reunião / conferência — 500 lux</option>
-<option value="300|22|80|Recepção">Recepção — 300 lux</option>
-<option value="200|25|80|Arquivo">Arquivo — 200 lux</option>
-<option value="750|16|80|Desenho técnico">Desenho técnico — 750 lux</option>
-<option value="300|25|80|Circulação / corredor">Circulação / corredor — 300 lux</option>
-<option value="200|22|80|Refeitório / sala de jantar">Refeitório / sala de jantar — 200 lux</option>
-</select>
+<button type="button" class="back-btn" id="backBtn">← Alterar tipo de projeto</button>
+<label>Nome do projeto</label><input id="project" placeholder="Ex.: Projeto LUXPRO">
+<label>Ambiente / atividade</label>
+<select id="activity"></select>
 <div class="nbr" style="margin-top:14px">
-<div class="metric"><small>Em mantida</small><strong id="luxN">500</strong> lux</div>
-<div class="metric"><small>UGRₗ máximo</small><strong id="ugrN">19</strong></div>
-<div class="metric"><small>Ra mínimo</small><strong id="raN">80</strong></div>
+<div class="metric"><small>Iluminância de referência</small><strong id="luxN">—</strong> lux</div>
+<div class="metric"><small>UGRₗ máximo</small><strong id="ugrN">—</strong></div>
+<div class="metric"><small>Ra mínimo</small><strong id="raN">—</strong></div>
 </div>
 </section>
 
@@ -120,10 +121,7 @@ footer{font-size:11px;color:var(--muted);margin:18px 2px}
 </section>
 </div>
 
-<footer>
-Base normativa de referência: ABNT NBR ISO/CIE 8995-1:2013 — Iluminação de ambientes de trabalho — Parte 1: Interior.
-Os valores exibidos são parâmetros de referência para as atividades selecionadas e não substituem a consulta à norma e a verificação luminotécnica completa.
-</footer>
+<footer id="footer">Selecione Residencial ou Comercial para iniciar.</footer>
 </div>
 
 <script>
@@ -137,11 +135,54 @@ Os valores exibidos são parâmetros de referência para as atividades seleciona
     minimumFractionDigits:d, maximumFractionDigits:d
   });
 
+  let projectMode = null;
+  const activities = {
+    residential: [
+      ["100|—|—|Sala de estar", "Sala de estar — 100 lux (mínimo)"],
+      ["100|—|—|Dormitório", "Dormitório — 100 lux (mínimo)"],
+      ["100|—|—|Banheiro", "Banheiro — 100 lux (mínimo)"],
+      ["100|—|—|Área de serviço", "Área de serviço — 100 lux (mínimo)"],
+      ["200|—|—|Copa / cozinha", "Copa / cozinha — 200 lux (mínimo)"],
+      ["75|—|—|Corredor / escada interna", "Corredor / escada interna — 75 lux (mínimo)"],
+      ["75|—|—|Garagem coberta", "Garagem coberta — 75 lux (mínimo)"],
+      ["20|—|—|Garagem descoberta", "Garagem descoberta — 20 lux (mínimo)"]
+    ],
+    commercial: [
+      ["500|19|80|Escrever, teclar, ler e processar dados", "Escrever, teclar, ler e processar dados — 500 lux"],
+      ["500|19|80|Sala de reunião / conferência", "Sala de reunião / conferência — 500 lux"],
+      ["300|22|80|Recepção", "Recepção — 300 lux"],
+      ["200|25|80|Arquivo", "Arquivo — 200 lux"],
+      ["750|16|80|Desenho técnico", "Desenho técnico — 750 lux"],
+      ["300|25|80|Circulação / corredor", "Circulação / corredor — 300 lux"],
+      ["200|22|80|Refeitório / sala de jantar", "Refeitório / sala de jantar — 200 lux"]
+    ]
+  };
+
+  function selectMode(mode){
+    projectMode = mode;
+    const select = $("activity");
+    select.innerHTML = "";
+    activities[mode].forEach(([value,label]) => {
+      const option = document.createElement("option");
+      option.value = value;
+      option.textContent = label;
+      select.appendChild(option);
+    });
+    $("startScreen").classList.add("hidden");
+    $("calculator").classList.remove("hidden");
+    $("headerSubtitle").textContent = mode === "residential" ? "Pré-dimensionamento luminotécnico residencial" : "Pré-dimensionamento luminotécnico comercial";
+    $("project").placeholder = mode === "residential" ? "Ex.: Residência Sette" : "Ex.: Escritório Sette";
+    $("footer").textContent = mode === "residential"
+      ? "Referência: ABNT NBR 15575-1:2025 — Edificações habitacionais — Desempenho, requisito de iluminação artificial. Os valores são níveis mínimos de desempenho; não representam, por si só, uma recomendação completa de projeto."
+      : "Referência: ABNT NBR ISO/CIE 8995-1:2013 — Iluminação de ambientes de trabalho — Parte 1: Interior. Os parâmetros de UGR e Ra são referências da atividade selecionada.";
+    updateNBR();
+  }
+
   function updateNBR(){
     const parts = $("activity").value.split("|");
-    $("luxN").textContent = parts[0];
-    $("ugrN").textContent = parts[1];
-    $("raN").textContent = parts[2];
+    $("luxN").textContent = parts[0] || "—";
+    $("ugrN").textContent = parts[1] || "—";
+    $("raN").textContent = parts[2] || "—";
     calc();
   }
 
@@ -256,6 +297,14 @@ Os valores exibidos são parâmetros de referência para as atividades seleciona
 
   function init(){
     // Main action buttons
+    $("residentialBtn").addEventListener("click", () => selectMode("residential"));
+    $("commercialBtn").addEventListener("click", () => selectMode("commercial"));
+    $("backBtn").addEventListener("click", () => {
+      projectMode = null;
+      $("calculator").classList.add("hidden");
+      $("startScreen").classList.remove("hidden");
+      $("headerSubtitle").textContent = "Cálculo luminotécnico residencial e comercial";
+    });
     $("addLumBtn").addEventListener("click", addLum);
     $("clearLumsBtn").addEventListener("click", clearLums);
 
