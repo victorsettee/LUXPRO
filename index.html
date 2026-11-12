@@ -109,7 +109,7 @@ footer{font-size:11px;color:var(--muted);margin:18px 2px}
 <div class="big" id="luxCalc">384 lux</div>
 <div class="bar"><span id="bar"></span></div>
 <div class="status" id="status">NÃO ATENDE</div>
-<div class="note">O resultado é um pré-dimensionamento. UGR e uniformidade exigem verificação luminotécnica adequada.</div>
+<div class="note">Pré-dimensionamento simplificado por fluxo luminoso e área. Este cálculo não comprova conformidade com ABNT: é necessário verificar distribuição, iluminância ponto a ponto, uniformidade, ofuscamento (UGR), plano de trabalho, refletâncias e fator de manutenção. O pé-direito informado ainda não entra nesta fórmula.</div>
 </div>
 <div>
 <div class="metric"><small>Fluxo total</small><strong id="fluxTotal">36.000 lm</strong></div>
@@ -174,7 +174,7 @@ footer{font-size:11px;color:var(--muted);margin:18px 2px}
     $("project").placeholder = mode === "residential" ? "Ex.: Residência Sette" : "Ex.: Escritório Sette";
     $("footer").textContent = mode === "residential"
       ? "Referência: ABNT NBR 15575-1:2025 — Edificações habitacionais — Desempenho, requisito de iluminação artificial. Os valores são níveis mínimos de desempenho; não representam, por si só, uma recomendação completa de projeto."
-      : "Referência: ABNT NBR ISO/CIE 8995-1:2013 — Iluminação de ambientes de trabalho — Parte 1: Interior. Os parâmetros de UGR e Ra são referências da atividade selecionada.";
+      : "Referência: ABNT NBR ISO/CIE 8995-1:2013 — Iluminação de ambientes de trabalho — Parte 1: Interior. Os parâmetros de iluminância mantida, UGRₗ e Ra são referências da atividade selecionada. O app não substitui a verificação completa do projeto conforme a norma.";
     updateNBR();
   }
 
@@ -280,10 +280,16 @@ footer{font-size:11px;color:var(--muted);margin:18px 2px}
     $("density").textContent = fmt(density) + " W/m²";
     $("raResult").textContent = ra;
 
-    const ok = maintained >= target;
-    $("status").textContent = ok ? "✓ ATENDE" : "✕ NÃO ATENDE";
+    const complete = area > 0 && active.length > 0 && active.every(x =>
+      Number(x.lm) > 0 && Number(x.w) > 0 && Number(x.q) > 0 &&
+      Number(x.uf) > 0 && Number(x.uf) <= 1 &&
+      Number(x.mf) > 0 && Number(x.mf) <= 1
+    );
+    const ok = complete && maintained >= target;
+    $("status").textContent = !complete ? "PREENCHA OS DADOS" :
+      (ok ? "ATINGE A REFERÊNCIA DE LUX" : "ABAIXO DA REFERÊNCIA DE LUX");
     $("status").className = "status " + (ok ? "ok" : "bad");
-    $("bar").style.width = Math.min(100, target ? maintained/target*100 : 0) + "%";
+    $("bar").style.width = Math.min(100, complete && target ? maintained/target*100 : 0) + "%";
 
     let detail = $("summary");
     if(!detail){
